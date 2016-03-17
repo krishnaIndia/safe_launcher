@@ -6,9 +6,7 @@ import * as sodium from 'libsodium-wrappers';
 import sessionManager from '../session_manager';
 import SessionInfo from '../model/session_info';
 import Permission from '../model/permission';
-import {
-  getSessionIdFromRequest
-} from '../utils'
+import { getSessionIdFromRequest } from '../utils'
 
 export let CreateSession = function(data) {
   let req = data.request;

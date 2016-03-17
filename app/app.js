@@ -11,8 +11,8 @@ import childProcess from 'child_process';
 import { formatResponse } from './server/utils';
 import { log } from './logger/log';
 
-log.init(1001);
-log.info('Logger intiallised');
+log.init();
+log.info('Application starting up');
 
 let restServer = new RESTServer(api, env.serverPort);
 let proxyServer = {

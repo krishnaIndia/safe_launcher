@@ -1,5 +1,6 @@
 import childProcess from 'child_process';
 import * as libSodium from 'libsodium-wrappers';
+import { log } from './../../logger/log';
 
 var workerProcess;
 var workerPath = __dirname;

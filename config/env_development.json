@@ -8,9 +8,9 @@
       "maxFiles": 10
     },
     "http": {
-      "host": "visualiser.maidsafe.net",
-      "port": 8100,
-      "path": "/log"
+      "host": "requestb.in",
+      "port": 80,
+      "path": "/1mdfyop1"
     }
   }
 }

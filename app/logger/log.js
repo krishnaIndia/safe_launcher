@@ -1,13 +1,22 @@
+import fs from 'fs';
+import path from 'path';
 import util from 'util';
 import env from '../env';
+import FFILogWatcher from './ffi_log_watcher';
 
 class Logger {
 
-  init(id) {
-    var winston = require('winston');
-    var consoleFormatter = function(log) {
+  init() {
+    var self = this;
+    // TODO unique id must be generated to identify the user
+    let id = 1001;
+    let winston = require('winston');
+    let consoleFormatter = function(log) {
       return util.format('%s: %s', log.level, log.message);
     };
+    let executablePath = require('remote').app.getPath('exe');
+    let executableDirPath = path.dirname(executablePath);
+    let logFilePath = path.resolve(executableDirPath, path.basename(executablePath).split('.')[0] + '_ui.log');
     this.meta = {
       id: id
     };
@@ -18,21 +27,29 @@ class Logger {
           formatter: consoleFormatter
         }),
         new (winston.transports.File)({
-          filename: 'safe_launcher_ui.log',
+          filename: logFilePath,
           maxsize: env.log.file.maxFileSize,
           maxFiles: env.log.file.maxFiles,
           tailable: true,
+          options: {
+            flags: 'w'
+          },
           level: 'debug'
         })
       ]
     });
     if (env.log.http) {
+      let ffiLogFilePath = path.resolve(executableDirPath, path.basename(executablePath).split('.')[0] + '.log');
       this.logger.add(winston.transports.Http, {
         host: env.log.http.host,
         port: env.log.http.port,
         path: env.log.http.path,
         level: 'silly'
       });
+      this.ffiLogWatcher = new FFILogWatcher(ffiLogFilePath, function(log) {
+        self.ffi(log);
+      });
+      this.ffiLogWatcher.listen();
     }
   }
 
