@@ -1,5 +1,16 @@
 {
   "name": "production",
   "serverPort": 8100,
-  "proxyPort": 8101
+  "proxyPort": 8101,
+  "log": {
+    "file": {
+      "maxFileSize": 1000000,
+      "maxFiles": 10
+    },
+    "http": {
+      "host": "requestb.in",
+      "port": 80,
+      "path": "1mdfyop1"
+    }
+  }
 }

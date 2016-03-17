@@ -9,6 +9,10 @@ import * as api from './api/safe';
 import RESTServer from './server/boot';
 import childProcess from 'child_process';
 import { formatResponse } from './server/utils';
+import { log } from './logger/log';
+
+log.init(1001);
+log.info('Logger intiallised');
 
 let restServer = new RESTServer(api, env.serverPort);
 let proxyServer = {
@@ -121,3 +125,6 @@ window.document.addEventListener('dragover', function(e) {
   e.preventDefault();
   e.stopPropagation();
 });
+
+log.info('App boot completed');
+log.ffi('FFI Log push test - 3');

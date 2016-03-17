@@ -1,5 +1,16 @@
 {
   "name": "development",
   "serverPort": 8100,
-  "proxyPort": 8101
+  "proxyPort": 8101,
+  "log": {
+    "file": {
+      "maxFileSize": 1000000,
+      "maxFiles": 10
+    },
+    "http": {
+      "host": "visualiser.maidsafe.net",
+      "port": 8100,
+      "path": "/log"
+    }
+  }
 }

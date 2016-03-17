@@ -63,7 +63,7 @@ export function errorCodeLookup(errCode) {
     case DNS_ERROR_START_RANGE:
       return 'DnsError::DnsNameAlreadyRegistered';
     case DNS_ERROR_START_RANGE - 1:
-      return 'DnsError::DnsRecordNotFound'
+      return 'DnsError::DnsRecordNotFound';
     case DNS_ERROR_START_RANGE - 2:
       return 'DnsError::ServiceAlreadyExists';
     case DNS_ERROR_START_RANGE - 3:
