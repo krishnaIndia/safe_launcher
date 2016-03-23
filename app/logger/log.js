@@ -9,7 +9,7 @@ class Logger {
   init() {
     var self = this;
     // TODO unique id must be generated to identify the user
-    let id = 1001;
+    let id = 'uid_' + 1001;
     let winston = require('winston');
     let consoleFormatter = function(log) {
       return util.format('%s: %s', log.level, log.message);
@@ -18,7 +18,7 @@ class Logger {
     let executableDirPath = path.dirname(executablePath);
     let logFilePath = path.resolve(executableDirPath, path.basename(executablePath).split('.')[0] + '_ui.log');
     this.meta = {
-      id: id
+      uid: id
     };
     this.logger = new (winston.Logger)({
       transports: [

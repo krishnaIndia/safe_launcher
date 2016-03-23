@@ -8,9 +8,9 @@
       "maxFiles": 10
     },
     "http": {
-      "host": "requestb.in",
-      "port": 80,
-      "path": "1mdfyop1"
+      "host": "localhost",
+      "port": 300,
+      "path": "log"
     }
   }
 }
