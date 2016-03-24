@@ -10,7 +10,7 @@
     "http": {
       "host": "localhost",
       "port": 3000,
-      "path": "/log"
+      "path": "log"
     }
   }
 }

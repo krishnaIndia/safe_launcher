@@ -6,7 +6,22 @@ import FFILogWatcher from './ffi_log_watcher';
 
 class Logger {
 
-  init() {
+  _getLogId() {
+    var args = require('remote').process.argv;
+    console.log(args)
+    var temp;
+    for (var i in args) {
+      temp = args[i].split('=');
+      console.log(temp)
+      if (temp[0] !== '--logId') {
+        continue;
+      }
+      return temp[1];
+    }
+    return;
+  }
+
+  init() {    
     var self = this;
     // TODO unique id must be generated to identify the user
     let id = 'uid_' + 1001;
@@ -17,8 +32,9 @@ class Logger {
     let executablePath = require('remote').app.getPath('exe');
     let executableDirPath = path.dirname(executablePath);
     let logFilePath = path.resolve(executableDirPath, path.basename(executablePath).split('.')[0] + '_ui.log');
+    let logId = this._getLogId();
     this.meta = {
-      uid: id
+      uid: logId
     };
     this.logger = new (winston.Logger)({
       transports: [
@@ -38,7 +54,7 @@ class Logger {
         })
       ]
     });
-    if (env.log.http) {
+    if (env.log.http && logId) {
       let ffiLogFilePath = path.resolve(executableDirPath, path.basename(executablePath).split('.')[0] + '.log');
       this.logger.add(winston.transports.Http, {
         host: env.log.http.host,

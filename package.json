@@ -31,7 +31,7 @@
     "postinstall": "cd app && npm install && bower install",
     "build": "gulp build",
     "release": "gulp release --env=production",
-    "start": "node ./tasks/start",
+    "start": "node ./tasks/start --logId=cd127640-f113-11e5-a27e-bd2b219077ec",
     "test": "gulp test",
     "package": "gulp package --env=production"
   },
