@@ -59,10 +59,9 @@ export default class RESTServer {
 
     var corsValidator = function(req, callback) {
       try {
-        var hostName = req.hostname;
-        var endsWithSafeNet = /\.safenet$/;
+        var origin = req.get('Origin');
         callback(null, {
-          origin: (hostName === 'localhost' || endsWithSafeNet.test(hostName))
+          origin: (origin ? /\.safenet$/.test(origin) : true)
         });
       } catch (e) {
         callback(e);
