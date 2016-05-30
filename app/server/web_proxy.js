@@ -48,9 +48,7 @@ var server = http.createServer(function(req, res) {
       target: 'http://localhost:' + args.serverPort
     });
   } else {
-    proxy.web(req, res, {
-      target: urlServe.protocol + '//' + urlServe.host
-    });
+    res.end(403);
   }
 });
 

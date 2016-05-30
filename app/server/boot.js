@@ -1,5 +1,7 @@
-import path from 'path'
+import url from 'url';
+import path from 'path';
 import http from 'http';
+import cors from 'cors';
 import express from 'express';
 import EventEmitter from 'events';
 import bodyParser from 'body-parser';
@@ -7,6 +9,7 @@ import sessionManager from './session_manager';
 import { router_0_4 } from './routes/version_0_4';
 import { CreateSession } from './controllers/auth';
 import { decryptRequest } from './utils';
+
 
 class ServerEventEmitter extends EventEmitter {};
 
@@ -54,12 +57,20 @@ export default class RESTServer {
     let EVENT_TYPE = this.app.get('EVENT_TYPE');
     let eventEmitter = this.app.get('eventEmitter');
 
-    app.use(function(req, res, next) {
-      res.header("Access-Control-Allow-Origin", "*");
-      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-      res.header("Access-Control-Allow-Methods", "DELETE, GET, OPTIONS, POST, PUT");
-      next();
-    });
+    var corsValidator = function(req, callback) {
+      try {
+        var hostName = req.hostname;
+        var endsWithSafeNet = /\.safenet$/;
+        callback(null, {
+          origin: (hostName === 'localhost' || endsWithSafeNet.test(hostName))
+        });
+      } catch (e) {
+        callback(e);
+      }
+    };
+
+    app.options('*', cors(corsValidator));
+    app.use(cors(corsValidator));
 
     app.use(function(req, res, next){
       if (req.headers['authorization']) {
