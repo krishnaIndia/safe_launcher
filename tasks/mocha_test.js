@@ -8,12 +8,10 @@ var jshint = require('gulp-jshint');
 var stylish = require('gulp-jscs-stylish');
 var childProcess = require('child_process');
 var babel = require('gulp-babel');
-var fse = require('fs-extra')
+var fse = require('fs-extra');
 var path = require('path');
 var os = require('os');
-var exec = require('child_process').exec;
 var gulpMocha = require('gulp-electron-mocha');
-var shell = require('gulp-shell');
 var install = require("gulp-install");
 var exec = require('gulp-exec');
 
@@ -52,23 +50,6 @@ if (process.platform === 'win32') {
 
 process.env['mocha-unfunk-style'] = 'plain';
 
-// var runMochaTests = function(cb) {
-//   childProcess.spawn(gulpPath, [
-//     '--renderder',
-//     '--compilers',
-//     'js:babel-core/register',
-//     '--timeout',
-//     '50000',
-//     '-R',
-//     'mocha-unfunk-reporter',
-//     './tests/*'
-//   ], {
-//     stdio: 'inherit'
-//   }).on('exit', function() {
-//     cb();
-//   });
-// }
-
 gulp.task('babelApi', function() {
   gulp.src(apiPaths)
   .pipe(babel())
@@ -93,19 +74,19 @@ gulp.task('babelRoot', function() {
   .pipe(gulp.dest(path.resolve('.', destDir)));
 });
 
-gulp.task('clean', function() {
+gulp.task('testClean', function() {
   fse.removeSync('./testApp/api');
   fse.removeSync('./testApp/server');
   fse.removeSync('./testApp/*.js');
   fse.removeSync('./testApp/*.json');
 });
 
-gulp.task('copy', function() {
+gulp.task('testCopy', function() {
   fse.copySync(path.resolve('./app/api/ffi', ffiName), path.resolve(destDir, 'api', 'ffi', ffiName));
   fse.copySync('./app/package.json', path.resolve(destDir, 'package.json'));
 });
 
-gulp.task('finalize', function() {
+gulp.task('testFinalise', function() {
   var manifest = fse.readJsonSync(path.resolve(destDir, 'package.json'));
   manifest.env = fse.readJsonSync(path.resolve('.', 'config', 'env_test.json'));
   fse.writeJsonSync(path.resolve(destDir, 'package.json'), manifest);
@@ -117,7 +98,7 @@ gulp.task('installPackages', function() {
   .pipe(install());
 });
 
-gulp.task('test_msvc_rebuild', [ 'installPackages' ], function() {
+gulp.task('testMsvcRebuild', [ 'installPackages' ], function() {
   var options = {
     continueOnError: false, // default = false, true means don't emit error event
     pipeStdout: false, // default = false, true means stdout is written to file.contents
@@ -133,7 +114,7 @@ gulp.task('test_msvc_rebuild', [ 'installPackages' ], function() {
   .pipe(exec.reporter(reportOptions));
 });
 
-gulp.task('mocha', [ 'test_msvc_rebuild' ], function() {
+gulp.task('mocha', [ 'testMsvcRebuild' ], function() {
   return gulp.src('./tests', {read: false})
   .pipe(gulpMocha.default({
     electronMocha: {
@@ -145,8 +126,8 @@ gulp.task('mocha', [ 'test_msvc_rebuild' ], function() {
   }))
 });
 
-// var executeTest = function(cb) {
-//   gulp.src(['./app/*.js', './app/api/**/**/*.js', './app/scripts/**/*js'])
+// var executeTest = function() {
+//   gulp.src(['./app/*.js', './app/api/**/**/*.js', './app/scripts/**/*js', './app/server/**/*js'])
 //     .pipe(jshint({
 //       esnext: true
 //     })) // hint (optional)
@@ -155,4 +136,4 @@ gulp.task('mocha', [ 'test_msvc_rebuild' ], function() {
 //   .pipe(jshint.reporter('jshint-stylish'));
 // };
 
-gulp.task('test', [ 'clean', 'babelApi', 'babelServer', 'babelLogger', 'babelRoot', 'copy', 'finalize', 'mocha' ]);
+gulp.task('test', [ 'testClean', 'babelApi', 'babelServer', 'babelLogger', 'babelRoot', 'testCopy', 'testFinalise', 'mocha' ]);
