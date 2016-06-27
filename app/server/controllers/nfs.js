@@ -5,6 +5,7 @@ import { ResponseHandler, formatResponse } from '../utils';
 import { log } from './../../logger/log';
 import { NfsWriter } from '../stream/nfs_writer';
 import { NfsReader } from '../stream/nfs_reader';
+import { errorCodeLookup } from './../error_code_lookup';
 
 const ROOT_PATH = {
   app: false,
@@ -216,9 +217,17 @@ export var getFile = function(req, res, next) {
   }
 
   let onFileMetadataRecieved = function(err, fileStats) {
-    log.debug('NFS - File metadata for reading - ' + fileStats);
+    log.debug('NFS - File metadata for reading - ' + (fileStats || JSON.stringify(err)));
     if (err) {
-      return res.status(400).send(err);
+      let status = 400;
+      if (err.errorCode) {
+        err.description = errorCodeLookup(err.errorCode);
+      }
+      log.error(err);
+      if (err.description && err.description.toLowerCase().indexOf('invalidpath') > -1) {
+        status = 404;
+      }
+      return res.status(status).send(err);
     }
     fileStats = formatResponse(fileStats);
     let range = req.get('range');
@@ -237,7 +246,7 @@ export var getFile = function(req, res, next) {
     }
     let start = parseInt(positions[0]);
     let total = fileStats.size;
-    let end = positions[1] ? parseInt(positions[1]) : total;
+    let end = (positions[1] && total) ? parseInt(positions[1]) : total;
     let chunksize = end - start;
     if (chunksize < 0 || end > total) {
       return res.sendStatus(416);
