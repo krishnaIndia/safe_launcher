@@ -1,6 +1,13 @@
 # SAFE Launcher Change Log
 
 ##[0.4.6]
+ - NFS API updated with streaming
+ - CORS and CSP moved to proxy
+ - Single client handle
+ - Removed encryption and base64 conversion
+ - Error build script added
+
+##[0.4.6]
  - update to safe_core to 0.15.1
  - Remote process logging integration
 
