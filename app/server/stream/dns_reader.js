@@ -31,7 +31,7 @@ DnsReader.prototype._read = function() {
   this.req.app.get('api').dns.getFile(this.longName, this.serviceName, this.filePath, this.curOffset,
     this.sizeToRead, this.hasSafeDriveAccess, this.appDirKey,
     function(err, data) {
-      if (err) {
+      if (err) {                
         return log.error(err);
       }
       self.curOffset += self.sizeToRead;

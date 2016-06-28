@@ -224,7 +224,8 @@ export var getFile = function(req, res, next) {
         err.description = errorCodeLookup(err.errorCode);
       }
       log.error(err);
-      if (err.description && err.description.toLowerCase().indexOf('invalidpath') > -1) {
+      if (err.description && (err.description.toLowerCase().indexOf('invalidpath') > -1 ||
+          err.description.toLowerCase().indexOf('pathnotfound') > -1)) {
         status = 404;
       }
       return res.status(status).send(err);

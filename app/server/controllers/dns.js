@@ -80,10 +80,10 @@ export var getFile = function(req, res) {
         err.description = errorCodeLookup(err.errorCode);
       }
       log.error(err);
-      if (err.description && err.description.toLowerCase().indexOf('invalidpath') > -1) {
-        status = 404;
+      if (err.description && (err.description.toLowerCase().indexOf('invalidpath') > -1 ||
+          err.description.toLowerCase().indexOf('pathnotfound') > -1)) {
+            return res.status(status).send(err);
       }
-      return res.status(status).send(err);
     }
     fileStats = formatResponse(fileStats);
     let range = req.get('range');
