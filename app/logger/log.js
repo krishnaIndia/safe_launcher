@@ -35,7 +35,7 @@ class Logger {
           date.getMilliseconds());
       return util.format('%s %s - %s', log.level.toUpperCase(), timeStamp, log.message);
     };
-    let executablePath = require('remote').app.getPath('exe');
+    let executablePath = require('electron').remote.app.getPath('exe');
     let executableDirPath = path.dirname(executablePath);
     let logFilePath = path.resolve(executableDirPath, path.basename(executablePath).split('.')[0] + '_ui.log');
 

@@ -1,13 +1,14 @@
 import path from 'path';
 import env from './../env';
-import { remote } from 'electron';
 import { log } from './../logger/log';
 import childProcess from 'child_process';
+import { remote } from 'electron';
 
 export default class ProxyController {
 
-  constructor() {
+  constructor(exePath) {
     this.process = null;
+    this.exePath = exePath;
   }
   
   start(proxyListener) {
@@ -15,19 +16,20 @@ export default class ProxyController {
       log.warn('Trying to start proxy server which is already running');
       return;
     }
+    let self = this;
     log.info('Starting proxy server');
-    this.process = childProcess.spawn(remote.app.getPath('exe'), [
-      'web_proxy.js',
+    this.process = childProcess.spawn(this.exePath, [
+      './web_proxy.js',
       '--proxyPort',
       env.proxyPort,
       '--serverPort',
       env.serverPort
     ], {
-      cwd: path.resolve(__dirname, 'server'),
       stdio: [ null, null, null, 'ipc' ]
     });
     this.process.on('close', function() {
       log.info('Proxy server stopped');
+      remote.getGlobal('cleanUp').proxy = null;
       proxyListener.onExit('Proxy server closed');
     });
     this.process.on('message', function(event) {
@@ -37,6 +39,7 @@ export default class ProxyController {
         case 'connection':
           if (event.msg.status) {
             log.info('Proxy server started');
+            remote.getGlobal('cleanUp').proxy = self.process.pid;
             return proxyListener.onStart(event.msg.data);
           }
           proxyListener.onError(event.msg.data);

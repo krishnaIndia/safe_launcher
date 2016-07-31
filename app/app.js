@@ -13,13 +13,9 @@ import { log } from './logger/log';
 log.debug('Application starting');
 
 let restServer = new RESTServer(api, env.serverPort);
-let proxyServer = new ProxyController();
+let proxyServer = new ProxyController(remote.app.getPath('exe'));
 
-window.onbeforeunload = function(e) {
-  proxyServer.stop();
-  api.close();
-  e.returnValue = true;
-};
+remote.getGlobal('cleanUp').proxy = proxyServer;
 
 window.NETWORK_STATE = {
   CONNECTING: 0,
@@ -31,7 +27,7 @@ window.NETWORK_STATE = {
 window.msl = new UIUtils(api, remote, restServer, proxyServer);
 
 var onFfiProcessTerminated = function(title, msg) {
-  require('remote').dialog.showMessageBox({
+  remote.dialog.showMessageBox({
     type: 'error',
     buttons: [ 'Ok' ],
     title: title,
@@ -86,3 +82,4 @@ window.document.addEventListener('dragover', function(e) {
   e.preventDefault();
   e.stopPropagation();
 });
+

@@ -19,7 +19,7 @@ var addToCallbackPool = function(id, callback) {
 
 var startWorker = function() {
   log.debug('Starting FFI worker client');
-  let executableDirPath = path.dirname(require('remote').app.getPath('exe'));
+  let executableDirPath = path.dirname(require('electron').remote.app.getPath('exe'));
   workerProcess = childProcess.fork(workerPath, [], {cwd: executableDirPath});
   workerProcess.on('close', function() {
     if (isClosed) {
@@ -72,7 +72,7 @@ var startWorker = function() {
 
 export var send = function(message, callback) {
   let strMessage = JSON.stringify(message);
-  let id = uuid.v4();
+  let id = '';//uuid.v4();
   log.debug('Sending message to FFI - ' + id + ' - ' + message.module + ' - ' +
     (message.action || ''));
   if (callback) {
