@@ -18,16 +18,13 @@ export default class ProxyController {
     }
     let self = this;
     log.info('Starting proxy server');
-    this.process = childProcess.spawn(this.exePath, [
-      './web_proxy.js',
+    this.process = childProcess.fork(path.resolve(__dirname, 'server/web_proxy.js'), [     
       '--proxyPort',
       env.proxyPort,
       '--serverPort',
       env.serverPort
-    ], {
-      stdio: [ null, null, null, 'ipc' ]
-    });
-    this.process.on('close', function() {
+    ]);
+    this.process.on('exit', function() {
       log.info('Proxy server stopped');
       remote.getGlobal('cleanUp').proxy = null;
       proxyListener.onExit('Proxy server closed');

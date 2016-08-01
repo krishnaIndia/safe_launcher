@@ -72,7 +72,7 @@ var startWorker = function() {
 
 export var send = function(message, callback) {
   let strMessage = JSON.stringify(message);
-  let id = '';//uuid.v4();
+  let id = uuid.v4();
   log.debug('Sending message to FFI - ' + id + ' - ' + message.module + ' - ' +
     (message.action || ''));
   if (callback) {
