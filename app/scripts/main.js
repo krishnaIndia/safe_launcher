@@ -36,11 +36,11 @@ window.safeLauncher = angular
     $rootScope.resetAppStates = function() {
       $rootScope.isAuthenticated = false;
       $rootScope.isAuthLoading = false;
-      $rootScope.currentAppDetails = {
-        logs: []
-      };
-      $rootScope.appList = {};
-      $rootScope.logList = [];
+      // $rootScope.currentAppDetails = {
+      //   logs: []
+      // };
+      // $rootScope.appList = {};
+      // $rootScope.logList = [];
       $rootScope.intervals = [];
       $rootScope.retryCount = 1;
     };

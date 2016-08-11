@@ -24,7 +24,7 @@ var AppList = React.createClass({
       1: 'SUCCESS',
       '-1': 'FAILURE'
     };
-    for (var i in this.props.list) {
+    for (var i in this.props.list) {      
       statusBar = React.DOM.div({ key: 'status-bar-' + i, className: 'status-bar in-progress' }, [
         React.DOM.span({ key: 'status-bar-time-' + i, className: 'time' },
           (window.moment(this.props.list[i].status.beginTime).format('HH:mm:ss') || '')
