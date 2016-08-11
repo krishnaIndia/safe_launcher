@@ -130,7 +130,7 @@ window.safeLauncher.factory('eventRegistrationFactory', [ '$rootScope', 'serverF
     factory.appLastLog = {};
     factory.currentAppDetails = null;
 
-    var activityEvents = function() {      
+    var activityEvents = function() {
       var updateActivity = function(data, isNew) {
         data.activity.appName = data.appName || 'Anonymous Application';
         if (isNew) {
@@ -153,12 +153,13 @@ window.safeLauncher.factory('eventRegistrationFactory', [ '$rootScope', 'serverF
           }
           factory.currentAppDetails.logs.unshift(data.activity);
         }
-        if (data.app && factory.appList[data.app]) {          
+        if (data.app && factory.appList[data.app]) {
           factory.appList[data.app].status = data.activity;
         } else if (!factory.appList[data.app]) {
           delete factory[data.app];
         }
-        $rootScope.logListComponent.update(factory.logList);
+        $rootScope.logListComponent.update(factory.currentAppDetails ?
+          factory.currentAppDetails.logs : factory.logList);
       };
 
       server.onNewAppActivity(function(data) {
@@ -167,7 +168,7 @@ window.safeLauncher.factory('eventRegistrationFactory', [ '$rootScope', 'serverF
         }
         setTimeout(function() {
           updateActivity(data, true);
-        }, 1);  
+        }, 1);
       });
 
       server.onUpdatedAppActivity(function(data) {

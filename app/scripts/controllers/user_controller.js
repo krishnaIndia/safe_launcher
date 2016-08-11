@@ -53,6 +53,7 @@ window.safeLauncher.controller('userController', [ '$scope', '$state', '$rootSco
         $scope.currentAppDetails = {
           logs: []
         };
+        eventFactory.currentAppDetails = null;
         return;
       }
       $scope.currentAppDetails = eventFactory.currentAppDetails = {
@@ -71,6 +72,7 @@ window.safeLauncher.controller('userController', [ '$scope', '$state', '$rootSco
             data[i].name = $scope.currentAppDetails.app.appName;
             $scope.currentAppDetails.logs.unshift(data[i]);
           }
+          $rootScope.logListComponent.update($scope.currentAppDetails.logs);
         });
       }
     };

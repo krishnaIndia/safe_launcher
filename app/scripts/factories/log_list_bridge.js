@@ -1,27 +1,25 @@
 /**
  * React list bridge
  */
-window.safeLauncher.factory('logListComponent', ['eventRegistrationFactory',
-	function(eventRegistry) {
+window.safeLauncher.factory('logListComponent', [ 'eventRegistrationFactory',
+  function(eventRegistry) {
     var self = this;
     var reactComponent;
-
-    self.register = function(component) {
-      reactComponent = component;      
-      reactComponent.state.list = eventRegistry.logList;
+    var appSpecificLogs;
+    self.register = function(component, appSpecific) {
+      reactComponent = component;
+      appSpecific = appSpecific;
+      reactComponent.state.list = appSpecific ? [] : eventRegistry.logList;
     };
-    
     self.unregister = function() {
       reactComponent = null;
     };
-
     self.update = function(list) {
-	  if (!reactComponent) {
+      if (!reactComponent) {
         return;
-	  }
-	  reactComponent.setState({ list:list });
+      }
+      reactComponent.setState({ list: list });
     };
-
     return self;
   }
 ]);

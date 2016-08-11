@@ -4,7 +4,8 @@ var AppLogs = React.createClass({
   propTypes: {
     bridge: React.PropTypes.object,
     filter: React.PropTypes.array,
-    table: React.PropTypes.string
+    table: React.PropTypes.string,
+    app: React.PropTypes.bool
   },
   getInitialState: function() {
     return {
@@ -12,7 +13,7 @@ var AppLogs = React.createClass({
     };
   },
   componentWillMount: function() {
-    this.props.bridge.register(this);
+    this.props.bridge.register(this, this.props.app);
   },
   componentWillUnmount: function() {
     this.props.bridge.unregister();
