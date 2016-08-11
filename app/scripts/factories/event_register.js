@@ -158,6 +158,7 @@ window.safeLauncher.factory('eventRegistrationFactory', [ '$rootScope', 'serverF
         } else if (!factory.appList[data.app]) {
           delete factory[data.app];
         }
+        $rootScope.logListComponent.update(factory.logList);
       };
 
       server.onNewAppActivity(function(data) {
