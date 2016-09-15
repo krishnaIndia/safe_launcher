@@ -80,9 +80,9 @@ class Misc extends FfiApi {
 
   _serialise(handleId, type) {
     return new Promise((resolve, reject) => {
-      const dataPointerRef = ref.alloc(PointerToU8Pointer);
-      const sizeRef = ref.alloc(size_t);
-      const capacityRef = ref.alloc(size_t);
+      let dataPointerRef = ref.alloc(PointerToU8Pointer);
+      let sizeRef = ref.alloc(size_t);
+      let capacityRef = ref.alloc(size_t);
       const onResult = (err, res) => {
         if (err || res !== 0) {
           return reject(err || res);

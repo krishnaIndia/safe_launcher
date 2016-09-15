@@ -142,9 +142,9 @@ class ImmutableData extends FfiApi {
   read(readerId, offset, length) {
     const self = this;
     const executor = (resolve, reject) => {
-      const dataRefRef = ref.alloc(PointerToU8Pointer);
-      const sizeRef = ref.alloc(u64);
-      const capacityRef = ref.alloc(u64);
+      let dataRefRef = ref.alloc(PointerToU8Pointer);
+      let sizeRef = ref.alloc(u64);
+      let capacityRef = ref.alloc(u64);
       const onResult = (err, res) => {
         if (err || res !== 0) {
           reject(err || res);
