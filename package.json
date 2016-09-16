@@ -1,7 +1,7 @@
 {
   "name": "safe-launcher",
   "productName": "SAFE Launcher",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "SAFE Launcher Application",
   "copyright": "© 2016, MaidSafe.net Ltd",
   "main": "dist/main.js",
@@ -38,13 +38,8 @@
     "url": "https://github.com/maidsafe/safe_launcher/issues"
   },
   "keywords": [
-    "electron",
-    "boilerplate",
-    "react",
-    "react-router",
-    "flux",
-    "webpack",
-    "react-hot"
+    "maidsafe",
+    "launcher"
   ],
   "homepage": "https://github.com/maidsafe/safe_launcher#safe_launcher",
   "devDependencies": {
@@ -144,7 +139,7 @@
     "zxcvbn": "^4.3.0"
   },
   "devEngines": {
-    "node": "4.x || 5.x || 6.x",
-    "npm": "2.x || 3.x"
+    "node": "6.x",
+    "npm": "3.x"
   }
 }
