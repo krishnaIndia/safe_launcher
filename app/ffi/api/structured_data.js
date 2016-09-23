@@ -175,6 +175,32 @@ class StructuredData extends FfiApi {
       });
     });
   }
+
+  delete(app, handleId) {
+    return new Promise((resolve, reject) => {
+      this.safeCore.struct_data_delete.async(appManager.getHandle(app), handleId, (err, res) => {
+        if (err || res !== 0) {
+          return reject(err || res);
+        }
+        resolve();
+      });
+    });
+  }
+
+  dropHandle(handleId) {
+    return new Promise((resolve, reject) => {
+      this.safeCore.struct_data_free.async(handleId, (err, res) => {
+        if (err || res !== 0) {
+          return reject(err || res);
+        }
+        resolve();
+      });
+    });
+  }
+
+  serialise(handleId) {
+    return misc.serialiseStructuredData(handleId);
+  }
 }
 
 const structuredData = new StructuredData();

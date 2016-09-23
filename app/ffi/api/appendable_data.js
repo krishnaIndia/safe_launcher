@@ -5,7 +5,7 @@ import FfiApi from '../ffi_api';
 import misc from './misc';
 
 import appManager from '../util/app_manager';
-import {FILTER_TYPE} from '../model/enum';
+import { FILTER_TYPE } from '../model/enum';
 const int32 = ref.types.int32;
 const u8 = ref.types.uint8;
 const u64 = ref.types.uint64;
@@ -332,7 +332,7 @@ class AppendableData extends FfiApi {
 
   serialise(handleId) {
     return misc.serialiseAppendableData(handleId);
-  };
+  }
 
 }
 
