@@ -1,21 +1,22 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import rawBodyParser from 'raw-body-parser';
-import { addAppActivity } from '../utils';
+import {addAppActivity} from '../utils';
 import * as NFS from '../controllers/nfs';
 import * as DNS from '../controllers/dns';
 import * as Auth from '../controllers/auth';
 import * as ImmutableData from '../controllers/immutable_data';
 import * as DataId from '../controllers/data_id';
+import * as CipherOpts from '../controllers/cipher_opts';
 import * as StructuredData from '../controllers/structured_data';
 import * as AppendableData from '../controllers/appendable_data';
 
 var router = express.Router();
 
-var jsonParser = bodyParser.json({ strict: false });
+var jsonParser = bodyParser.json({strict: false});
 
-var ActivityMiddleware = function(activityName) {
-  this.onRequest = function(req, res, next) {
+var ActivityMiddleware = function (activityName) {
+  this.onRequest = function (req, res, next) {
     addAppActivity(req, activityName);
     next();
   };
@@ -26,7 +27,7 @@ router.post('/auth', jsonParser,
   new ActivityMiddleware('Authorise app'), Auth.authorise);
 router.get('/auth',
   new ActivityMiddleware('Validate app authorisation'), Auth.isTokenValid);
-router.delete('/auth',  new ActivityMiddleware('Revoke app'), Auth.revoke);
+router.delete('/auth', new ActivityMiddleware('Revoke app'), Auth.revoke);
 
 // NFS - DIRECTORY API
 router.post('/nfs/directory/:rootPath/*', jsonParser,
@@ -67,19 +68,41 @@ router.get('/dns', new ActivityMiddleware('List long names'), DNS.listLongNames)
 router.get('/dns/:longName', new ActivityMiddleware('List services'), DNS.listServices);
 
 // DATA-ID API
-router.get('/dataId/:handleId', new ActivityMiddleware('Get serialised dataId'), DataId.serialise);
-router.post('/dataId', rawBodyParser(), new ActivityMiddleware('Deserialise dataId'), DataId.deserialise);
-router.delete('/dataId/:handleId', new ActivityMiddleware('Drop dataId handle'), DataId.dropHandle);
+router.post('/data-id/structured-data', new ActivityMiddleware('Get dataId for Structured Data'),
+  DataId.getDataIdForStructuredData);
+router.post('/data-id/appendable-data', new ActivityMiddleware('Get dataId for Appendable Data'),
+  DataId.getDataIdForAppendableData);
+router.get('/data-id/:handleId', new ActivityMiddleware('Get serialised dataId'), DataId.serialise);
+router.post('/data-id', rawBodyParser(), new ActivityMiddleware('Deserialise dataId'), DataId.deserialise);
+router.delete('/data-id/:handleId', new ActivityMiddleware('Drop dataId handle'), DataId.dropHandle);
+
+// cipher-opts
+router.get('/cipher-opts/:encType/:?key', new ActivityMiddleware('Get cipher-opts handle'), CipherOpts.getHandle);
+router.delete('/cipher-opts/:handleId', new ActivityMiddleware('Drop cipher-opts handle'), CipherOpts.dropHandle);
 
 // ImmutableData API
 router.post('/immutableData', new ActivityMiddleware('Create immutable data chunks'), ImmutableData.write);
 router.get('/immutableData/:handleId', new ActivityMiddleware('Read immutable data chunks'), ImmutableData.read);
 
 // Structured Data
-router.post('/structuredData/:id', rawBodyParser(), new ActivityMiddleware('Create structured data'), StructuredData.create);
-router.get('/structuredData/handle/:id', new ActivityMiddleware('Get structured data handle'), StructuredData.getHandle);
-router.put('/structuredData/:handleId', rawBodyParser(), new ActivityMiddleware('Update structured data'), StructuredData.update);
-router.get('/structuredData/:handleId', new ActivityMiddleware('Read structured data'), StructuredData.read);
+router.post('/structured-data/', jsonParser, new ActivityMiddleware('Create structured data'), StructuredData.create);
+router.get('/structured-data/handle/:dataIdHandle', new ActivityMiddleware('Get structured data handle'),
+  StructuredData.getHandle);
+router.get('/structured-data/data-id/:handleId',
+  new ActivityMiddleware('Get data-id handle from structured data handle'), StructuredData.asDataId);
+router.get('/structured-data/:handleId', new ActivityMiddleware('Read structured data'), StructuredData.read);
+router.put('/structured-data/:handleId', new ActivityMiddleware('Save structured data - PUT'), StructuredData.put);
+router.post('/structured-data/:handleId', new ActivityMiddleware('Save structured data - POST'), StructuredData.post);
+router.patch('/structured-data/:handleId', new ActivityMiddleware('Update data of structured data'),
+  StructuredData.update);
+router.get('/structured-data/serialise/:handleId', new ActivityMiddleware('Serialise structured data handle'),
+  StructuredData.serialise);
+router.post('/structured-data/deserialise', rawBodyParser(),
+  new ActivityMiddleware('De-Serialise structured data handle'), StructuredData.deserialise);
+router.delete('/structured-data/:handleId', new ActivityMiddleware('Delete structured data'),
+  StructuredData.deleteStructureData);
+router.delete('/structured-data/handle/:handleId', new ActivityMiddleware('Drop structured data handle'),
+  StructuredData.dropHandle);
 
 // AppendableData - encryptKey API
 router.get('/appendableData/encryptKey/:handleId', new ActivityMiddleware('Get encrypt key'), AppendableData.getEncryptKey);
@@ -97,5 +120,5 @@ router.get('/appendableData/:handleId/:index', new ActivityMiddleware('Get DataI
 router.delete('/appendableData/:handleId/:index', new ActivityMiddleware('Remove from appendable data'), AppendableData.remove);
 
 /*jscs:disable requireCamelCaseOrUpperCaseIdentifiers*/
-export { router as router_0_5 };
+export {router as router_0_5};
 /*jscs:enable requireCamelCaseOrUpperCaseIdentifiers*/

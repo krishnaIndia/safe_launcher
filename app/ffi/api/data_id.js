@@ -37,7 +37,7 @@ class DataId extends FfiApi {
     return new Promise(executor);
   }
 
-  getStructuredDataHandle(typeTag, id) {
+  getStructuredDataHandle(typeTag = 501, name) {
     const self = this;
     const executor = (resolve, reject) => {
       const handleRef = ref.alloc(u64);
@@ -47,12 +47,12 @@ class DataId extends FfiApi {
         }
         resolve(handleRef.deref());
       };
-      self.safeCore.data_id_new_struct_data.async(typeTag, id, handleRef, onResult);
+      self.safeCore.data_id_new_struct_data.async(typeTag, name, handleRef, onResult);
     };
     return new Promise(executor);
   }
 
-  getAppendableDataHandle(id, isPrivate) {
+  getAppendableDataHandle(name, isPrivate = false) {
     const self = this;
     const executor = (resolve, reject) => {
       const handleRef = ref.alloc(u64);
@@ -62,7 +62,7 @@ class DataId extends FfiApi {
         }
         resolve(handleRef.deref());
       };
-      self.safeCore.data_id_new_appendable_data.async(id, isPrivate, handleRef, onResult);
+      self.safeCore.data_id_new_appendable_data.async(name, isPrivate, handleRef, onResult);
     };
     return new Promise(executor);
   }

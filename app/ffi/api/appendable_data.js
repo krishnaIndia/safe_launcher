@@ -76,7 +76,20 @@ class AppendableData extends FfiApi {
     });
   }
 
-  getDataId(appendHandleId, fromDeleted) {
+  asDataId(appendHandleId) {
+    return new Promise((resolve, reject) => {
+      let dataHandleRef = ref.alloc(u64);
+      const onResult = (err, res) => {
+        if (err || res !== 0) {
+          return reject(err || res);
+        }
+        resolve(dataHandleRef.deref());
+      };
+      this.safeCore.appendable_data_extract_data_id.async(appendHandleId, dataHandleRef, onResult);
+    });
+  }
+
+  getDataId(appendHandleId, index, fromDeleted) {
     return new Promise((resolve, reject) => {
       let dataHandleRef = ref.alloc(u64);
       const onResult = (err, res) => {
@@ -86,9 +99,9 @@ class AppendableData extends FfiApi {
         resolve(dataHandleRef.deref());
       };
       if (fromDeleted) {
-        this.safeCore.appendable_data_nth_deleted_data_id.async(appendHandleId, dataHandleRef, onResult);
+        this.safeCore.appendable_data_nth_deleted_data_id.async(appendHandleId, index, dataHandleRef, onResult);
       } else {
-        this.safeCore.appendable_data_extract_data_id.async(appendHandleId, dataHandleRef, onResult);
+        this.safeCore.appendable_data_extract_data_id.async(appendHandleId, index, dataHandleRef, onResult);
       }
     });
   }
@@ -257,20 +270,6 @@ class AppendableData extends FfiApi {
       } else {
         this.safeCore.appendable_data_num_of_data.async(handleId, lengthRef, onResult);
       }
-    });
-  }
-
-  getDataIdAt(app, handleId, index) {
-    return new Promise((resolve, reject) => {
-      const dataIdRef = ref.alloc(u64);
-      const onResult = (err, res) => {
-        if (err || res !== 0) {
-          return reject(err || res);
-        }
-        resolve(dataIdRef.deref());
-      };
-      this.safeCore.appendable_data_nth_data_id.async(appManager.getHandle(app),
-        handleId, index, dataIdRef, onResult);
     });
   }
 

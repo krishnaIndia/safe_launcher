@@ -201,6 +201,10 @@ class StructuredData extends FfiApi {
   serialise(handleId) {
     return misc.serialiseStructuredData(handleId);
   }
+
+  deserialise(data) {
+    return misc.deserialiseStructuredData(data);
+  }
 }
 
 const structuredData = new StructuredData();
