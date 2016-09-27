@@ -18,10 +18,9 @@ const u64Pointer = ref.refType(u64);
 const boolPointer = ref.refType(bool);
 const size_tPointer = ref.refType(size_t);
 
-Enum.register();
 const Ffi_FilterType = new Enum([ 'BlackList', 'WhiteList' ]);
 
-const filterTypePointer = ref.refType(size_t);
+const filterTypePointer = ref.refType(Ffi_FilterType);
 
 class AppendableData extends FfiApi {
 
@@ -46,7 +45,7 @@ class AppendableData extends FfiApi {
       'appendable_data_free': [int32, [u64]],
       'appendable_data_insert_to_filter': [int32, [u64, u64]],
       'appendable_data_is_owned': [int32, [AppHandle, u64, boolPointer]],
-      'appendable_data_version': [int32, [u64]],
+      'appendable_data_version': [int32, [u64, u64Pointer]],
       'appendable_data_num_of_deleted_data': [int32, [u64, size_tPointer]],
       'appendable_data_nth_deleted_data_id': [int32, [AppHandle, u64, size_t, u64Pointer]],
       'appendable_data_nth_data_sign_key': [int32, [AppHandle, u64, size_t, u64Pointer]],
@@ -57,6 +56,7 @@ class AppendableData extends FfiApi {
       'appendable_data_remove_nth_deleted_data': [int32, [u64, size_t]],
       'appendable_data_remove_from_filter': [int32, [u64, u64]],
       'appendable_data_filter_type': [int32, [u64, filterTypePointer]]
+      // 'appendable_data_delete': [int32, [AppHandle, u64]]
     };
   }
 
@@ -101,7 +101,7 @@ class AppendableData extends FfiApi {
       if (fromDeleted) {
         this.safeCore.appendable_data_nth_deleted_data_id.async(appendHandleId, index, dataHandleRef, onResult);
       } else {
-        this.safeCore.appendable_data_extract_data_id.async(appendHandleId, index, dataHandleRef, onResult);
+        this.safeCore.appendable_data_nth_data_id.async(appendHandleId, index, dataHandleRef, onResult);
       }
     });
   }
@@ -162,10 +162,9 @@ class AppendableData extends FfiApi {
         if (err || res !== 0) {
           return reject(err || res);
         }
-        // TODO deref filter
-        resolve();
+        resolve(filterTypeRef.deref());
       };
-      this.safeCore.appendable_data_remove_from_filter.async(handleId, filterTypeRef, onResult);
+      this.safeCore.appendable_data_filter_type.async(handleId, filterTypeRef, onResult);
     });
   }
 
@@ -256,7 +255,7 @@ class AppendableData extends FfiApi {
     });
   }
 
-  getLength(handleId, isDeleted) {
+  getLength(handleId, fromDeleted) {
     return new Promise((resolve, reject) => {
       const lengthRef = ref.alloc(size_t);
       const onResult = (err, res) => {
@@ -265,7 +264,7 @@ class AppendableData extends FfiApi {
         }
         resolve(lengthRef.deref());
       };
-      if (isDeleted) {
+      if (fromDeleted) {
         this.safeCore.appendable_data_num_of_deleted_data.async(handleId, lengthRef, onResult);
       } else {
         this.safeCore.appendable_data_num_of_data.async(handleId, lengthRef, onResult);
@@ -329,8 +328,30 @@ class AppendableData extends FfiApi {
     });
   }
 
+  delete(app, handleId) {
+    return new Promise((resolve, reject) => {
+      this.safeCore.appendable_data_delete.async(appManager.getHandle(app), handleId, (err, res) => {
+        if (err || res !== 0) {
+          return reject(err || res);
+        }
+        resolve();
+      });
+    });
+  }
+
   serialise(handleId) {
     return misc.serialiseAppendableData(handleId);
+  }
+
+  dropHandle(handleId) {
+    return new Promise((resolve, reject) => {
+      this.safeCore.appendable_data_free.async(handleId, (err, res) => {
+        if (err || res !== 0) {
+          return reject(err || res);
+        }
+        resolve();
+      });
+    });
   }
 
 }

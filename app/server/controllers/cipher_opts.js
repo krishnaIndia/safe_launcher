@@ -29,13 +29,13 @@ export const getHandle = async (req, res, next) => {
         handle = await cypherOpts.getCipherOptSymmetric();
         break;
       case ENCRYPTION_TYPE.ASYMMETRIC:
-        if (!req.params.key) {
+        if (!req.params.keyHandle) {
           return next(new ResponseError(400, '\'key\' must be specified for Asymmetric encryption'));
         }
-        handle = await cypherOpts.getCipherOptAsymmetric(req.params.key);
+        handle = await cypherOpts.getCipherOptAsymmetric(req.params.keyHandle);
         break;
     }
-    responseHandler({
+    responseHandler(null, {
       handleId: handle
     });
   } catch (e) {

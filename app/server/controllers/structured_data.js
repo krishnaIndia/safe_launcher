@@ -74,22 +74,40 @@ export const getHandle = async (req, res) => {
   }
 };
 
+export const getMetadata = async (req, res) => {
+  const responseHandler = new ResponseHandler(req, res);
+  try {
+    const sessionInfo = sessionManager.get(req.headers.sessionId);
+    const app = sessionInfo ? sessionInfo.app : null;
+    const handleId = req.params.handleId;
+    const isOwner = await structuredData.isOwner(app, handleId);
+    const version = await structuredData.getVersion(handleId);
+    responseHandler(null, {
+      isOwner: isOwner,
+      version: version
+    });
+  } catch(e) {
+    responseHandler(e);
+  }
+};
+
 export const asDataId = async (req, res) => {
+  const responseHandler = new ResponseHandler(req, res);
   try {
     const sessionInfo = sessionManager.get(req.headers.sessionId);
     const app = sessionInfo ? sessionInfo.app : null;
     const handleId = req.params.handleId;
     const dataIdHandle = await structuredData.asDataId(handleId);
-    res.send({
+    responseHandler(null, {
       handleId: dataIdHandle
     });
-    updateAppActivity(req, res, true);
   } catch(e) {
-    new ResponseHandler(req, res)(e);
+    responseHandler(e);
   }
 };
 
 export const update = async (req, res, next) => {
+  const responseHandler = new ResponseHandler(req, res);
   try {
     const sessionInfo = sessionManager.get(req.headers.sessionId);
     if (!sessionInfo) {
@@ -102,8 +120,9 @@ export const update = async (req, res, next) => {
     const cipherOptsHandle = req.body.cipherOpts || PLAIN_ENCRYPTION;
     const data = new Buffer(req.body, 'base64');
     await structuredData.update(app, req.params.handleId, cipherOptsHandle, data);
+    responseHandler();
   } catch (e) {
-    new ResponseHandler(req, res)(e);
+    responseHandler(e);
   }
 };
 
@@ -130,8 +149,7 @@ export const deleteStructureData = async (req, res, next) => {
     const app = sessionInfo ? sessionInfo.app : null;
     const handleId = parseInt(req.params.handleId);
     await structuredData.delete(app, handleId);
-    res.sendStatus(200);
-    updateAppActivity(req, res, true);
+    responseHandler();
   } catch (e) {
     console.error(e);
     responseHandler(e);
@@ -147,9 +165,8 @@ export const post = async (req, res, next) => {
     }
     const app = sessionInfo ? sessionInfo.app : null;
     const handleId = req.params.handleId;
-    await structuredData.save(app, handleId, false);
-    res.sendStatus(200);
-    updateAppActivity(req, res, true);
+    await structuredData.save(app, handleId, true);
+    responseHandler();
   } catch (e) {
     responseHandler(e);
   }
@@ -164,9 +181,8 @@ export const put = async (req, res, next) => {
     }
     const app = sessionInfo ? sessionInfo.app : null;
     const handleId = req.params.handleId;
-    await structuredData.save(app, handleId, true);
-    res.sendStatus(200);
-    updateAppActivity(req, res, true);
+    await structuredData.save(app, handleId, false);
+    responseHandler();
   } catch (e) {
     responseHandler(e);
   }
@@ -195,8 +211,7 @@ export const dropHandle = async (req, res) => {
   try {
     const handleId = req.params.handleId;
     await structuredData.dropHandle(handleId);
-    res.sendStatus(200);
-    updateAppActivity(req, res, true);
+    responseHandler();
   } catch (e) {
     console.error(e);
     responseHandler(e);
@@ -224,13 +239,11 @@ export const deserialise = async (req, res) => {
     const handleId = await structuredData.deserialise(req.rawBody);
     const isOwner = app ? await structuredData.isOwner(app, handleId) : false;
     const version = await structuredData.getVersion(handleId);
-    // TODO get typeTag
-    res.send({
+    responseHandler(null, {
       handleId: handleId,
       isOwner: isOwner,
       version: version
     });
-    updateAppActivity(req, res, true);
   } catch (e) {
     console.error(e);
     responseHandler(e);

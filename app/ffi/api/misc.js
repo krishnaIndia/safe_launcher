@@ -28,9 +28,9 @@ class Misc extends FfiApi {
       'misc_serialise_data_id': [int32, [u64, PointerToU8Pointer, size_tPointer, size_tPointer]],
       'misc_deserialise_data_id': [int32, [u8Pointer, size_t, u64Pointer]],
       'misc_serialise_appendable_data': [int32, [u64, PointerToU8Pointer, size_tPointer, size_tPointer]],
-      'misc_serialise_structured_data': [int32, [u64, PointerToU8Pointer, size_tPointer, size_tPointer]],
+      'misc_serialise_struct_data': [int32, [u64, PointerToU8Pointer, size_tPointer, size_tPointer]],
       'misc_deserialise_appendable_data': [int32, [u8Pointer, size_t, u64Pointer]],
-      'misc_deserialise_structured_data': [int32, [u8Pointer, size_t, u64Pointer]],
+      'misc_deserialise_struct_data': [int32, [u8Pointer, size_t, u64Pointer]],
       'misc_u8_ptr_free': [Void, [u8Pointer, size_t, size_t]]
     };
   }

@@ -14,7 +14,7 @@ export const getDataIdForStructuredData = async (req, res) => {
     const sessionInfo = sessionManager.get(req.headers.sessionId);
     const app = sessionInfo ? sessionInfo.app : undefined;
     const handleId = await dataId.getStructuredDataHandle(req.body.typeTag, req.body.name);
-    responseHandler({
+    responseHandler(null, {
       handleId: handleId
     });
   } catch (e) {
@@ -27,7 +27,11 @@ export const getDataIdForAppendableData = async (req, res) => {
   try {
     const sessionInfo = sessionManager.get(req.headers.sessionId);
     const app = sessionInfo ? sessionInfo.app : undefined;
-    dataId.getAppendableDataHandle(req.body.name, req.body.isPrivate);
+    const name = new Buffer(req.body.name, 'base64');
+    const handleId = await dataId.getAppendableDataHandle(name, req.body.isPrivate);
+    responseHandler(null, {
+      handleId: handleId
+    });
   } catch (e) {
     responseHandler(e);
   }
@@ -61,7 +65,7 @@ export const deserialise = async (req, res, next) => {
       return next(new ResponseError(400, 'Body can not be empty'));
     }
     const dataHandle = await misc.deserialiseDataId(req.rawBody);
-    responseHandler({
+    responseHandler(null, {
       handleId: dataHandle
     });
   } catch(e) {

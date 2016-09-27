@@ -4,14 +4,12 @@ import sessionManager from '../session_manager';
 import {ResponseError, ResponseHandler, updateAppActivity} from '../utils';
 import { FILTER_TYPE } from '../../ffi/model/enum';
 import appendableData from '../../ffi/api/appendable_data';
-import dataId from '../../ffi/api/data_id';
 import misc from '../../ffi/api/misc';
 
 const API_ACCESS_NOT_GRANTED = 'Low level api access is not granted';
 const UNAUTHORISED_ACCESS = 'Unauthorised access';
 const ID_LENGTH = 32;
 
-// post /
 export const create = async (req, res, next) => {
   try {
     const sessionInfo = sessionManager.get(req.headers.sessionId);
@@ -54,7 +52,7 @@ export const post = async (req, res, next) => {
       return next(new ResponseError(403, API_ACCESS_NOT_GRANTED));
     }
     const handleId = req.params.handleId;
-    await appendableData.save(app, handleId, false);
+    await appendableData.save(app, handleId, true);
     res.sendStatus(200);
   } catch (e) {
     new ResponseHandler(req, res)(e);
@@ -72,25 +70,23 @@ export const put = async (req, res, next) => {
       return next(new ResponseError(403, API_ACCESS_NOT_GRANTED));
     }
     const handleId = req.params.handleId;
-    await appendableData.save(app, handleId, true);
+    await appendableData.save(app, handleId, false);
     res.sendStatus(200);
   } catch (e) {
     new ResponseHandler(req, res)(e);
   }
 };
 
-// GET /dataIdHandle
-export const getHandle = async (req, res, next) => {
+export const getHandle = async (req, res) => {
   try {
     const sessionInfo = sessionManager.get(req.headers.sessionId);
     let app;
     if (sessionInfo) {
       app = sessionInfo.app;
     }
-    const handleId = await appendableData.getAppendableDataHandle(app, req.params.handleId);
+    const handleId = await appendableData.getAppendableDataHandle(app, req.params.dataIdHandle);
     const isOwner = await appendableData.isOwner(app, handleId);
     const version = await appendableData.getVersion(handleId);
-    // TODO const isPrivate = await appendableData.
     const filterType = await appendableData.getFilterType(handleId);
     const dataLength = await appendableData.getLength(handleId, false);
     const deletedDataLength = await appendableData.getLength(handleId, true);
@@ -108,23 +104,49 @@ export const getHandle = async (req, res, next) => {
   }
 };
 
-// HEAD /handleId
-export const getDataIdHandle = async (req, res, next) => {
+export const getMetadata = async (req, res) => {
+  const responseHandler = new ResponseHandler(req, res);
+  try {
+    const sessionInfo = sessionManager.get(req.headers.sessionId);
+    let app;
+    if (sessionInfo) {
+      app = sessionInfo.app;
+    }
+    const handleId = req.params.handleId;
+    const isOwner = await appendableData.isOwner(app, handleId);
+    const version = await appendableData.getVersion(handleId);
+    const filterType = await appendableData.getFilterType(handleId);
+    const dataLength = await appendableData.getLength(handleId, false);
+    const deletedDataLength = await appendableData.getLength(handleId, true);
+    responseHandler(null, {
+      handleId: handleId,
+      isOwner: isOwner,
+      version: version,
+      filterType: filterType,
+      dataLength: dataLength,
+      deletedDataLength: deletedDataLength
+    });
+  } catch(e) {
+    responseHandler(e);
+  }
+};
+
+export const getDataIdHandle = async (req, res) => {
+  const responseHandler = new ResponseHandler(req, res);
   try {
     const sessionInfo = sessionManager.get(req.headers.sessionId);
     const app = sessionInfo ? sessionInfo.app : null;
     const handleId = await appendableData.asDataId(req.params.handleId);
-    res.send({
+    responseHandler(null, {
       handleId: handleId
     });
-    updateAppActivity(req, res, true);
   } catch(e) {
-    new ResponseHandler(req, res)(e);
+    responseHandler(e);
   }
 };
 
-// GET /encryptKey/handleId
 export const getEncryptKey = async (req, res, next) => {
+  const responseHandler = new ResponseHandler(req, res);
   try {
     const sessionInfo = sessionManager.get(req.headers.sessionId);
     if (!sessionInfo) {
@@ -135,16 +157,16 @@ export const getEncryptKey = async (req, res, next) => {
     }
     const app = sessionInfo.app;
     const encryptKeyHandle = await appendableData.getEncryptKey(app, req.params.handleId);
-    res.send({
+    responseHandler(null, {
       handleId: encryptKeyHandle
     });
-    updateAppActivity(req, res, true);
   } catch(e) {
-    new ResponseHandler(req, res)(e);
+    responseHandler(e);
   }
 };
 
 export const getSigningKey = async (req, res, next) => {
+  const responseHandler = new ResponseHandler(req, res);
   try {
     const sessionInfo = sessionManager.get(req.headers.sessionId);
     if (!sessionInfo) {
@@ -155,16 +177,16 @@ export const getSigningKey = async (req, res, next) => {
     }
     const app = sessionInfo.app;
     const signingKeyHandle = await appendableData.getSigningKey(app, req.params.index, req.params.handleId, false);
-    res.send({
+    responseHandler(null, {
       handleId: signingKeyHandle
     });
-    updateAppActivity(req, res, true);
   } catch(e) {
-    new ResponseHandler(req, res)(e);
+    responseHandler(e);
   }
 };
 
 export const getSigningKeyFromDeletedData = async (req, res, next) => {
+  const responseHandler = new ResponseHandler(req, res);
   try {
     const sessionInfo = sessionManager.get(req.headers.sessionId);
     if (!sessionInfo) {
@@ -175,17 +197,16 @@ export const getSigningKeyFromDeletedData = async (req, res, next) => {
     }
     const app = sessionInfo.app;
     const signingKeyHandle = await appendableData.getSigningKey(app, req.params.index, req.params.handleId, true);
-    res.send({
+    responseHandler(null, {
       handleId: signingKeyHandle
     });
-    updateAppActivity(req, res, true);
   } catch(e) {
-    new ResponseHandler(req, res)(e);
+    responseHandler(e);
   }
 };
 
-// PUT /hanldeId/dataHandleId
 export const append = async (req, res, next) => {
+  const responseHandler = new ResponseHandler(req, res);
   try {
     const sessionInfo = sessionManager.get(req.headers.sessionId);
     if (!sessionInfo) {
@@ -196,17 +217,28 @@ export const append = async (req, res, next) => {
     }
     const app = sessionInfo.app;
     await appendableData.append(app, req.params.handleId, req.params.dataIdHandle);
-    res.sendStatus(200);
-    updateAppActivity(req, res, true);
+    responseHandler();
   } catch(e) {
-    new ResponseHandler(req, res)(e);
+    responseHandler(e);
   }
 };
 
-// GET /id/at
 export const getDataIdAt = async (req, res) => {
+  const responseHandler = new ResponseHandler(req, res);
   try {
-    const handleId = await appendableData.getDataId(req.params.handleId, req.params.index);
+    const handleId = await appendableData.getDataId(req.params.handleId, req.params.index, false);
+    res.send({
+      handleId: handleId
+    });
+    responseHandler();
+  } catch(e) {
+    responseHandler(e);
+  }
+};
+
+export const getDeletedDataIdAt = async (req, res) => {
+  try {
+    const handleId = await appendableData.getDataId(req.params.handleId, req.params.index, true);
     res.send({
       handleId: handleId
     });
@@ -274,7 +306,6 @@ export const removeFromFilter = async (req, res) => {
   }
 };
 
-// DELETE /id/at
 export const remove = async (req, res, next) => {
   const responseHandler = new ResponseHandler(req, res);
   try {
@@ -343,7 +374,6 @@ export const clearDeletedData = async (req, res, next) => {
   }
 };
 
-// DELETE /encryptKey/id
 export const dropEncryptKeyHandle = async (req, res, next) => {
   const responseHandler = new ResponseHandler(req, res);
   try {
@@ -357,6 +387,60 @@ export const dropEncryptKeyHandle = async (req, res, next) => {
     await misc.dropEncryptKeyHandle(req.params.handleId);
     responseHandler();
   } catch(e) {
+    responseHandler(e);
+  }
+};
+
+export const dropSigningKeyHandle = async (req, res, next) => {
+  const responseHandler = new ResponseHandler(req, res);
+  try {
+    const sessionInfo = sessionManager.get(req.headers.sessionId);
+    if (!sessionInfo) {
+      return next(new ResponseError(401, UNAUTHORISED_ACCESS));
+    }
+    if (!sessionInfo.app.permission.lowLevelApi) {
+      return next(new ResponseError(403, API_ACCESS_NOT_GRANTED));
+    }
+    await misc.dropSignKeyHandle(req.params.handleId);
+    responseHandler();
+  } catch(e) {
+    responseHandler(e);
+  }
+};
+
+export const deleteAppendableData = async (req, res) => {
+  const responseHandler = new ResponseHandler(req, res);
+  try {
+    const sessionInfo = sessionManager.get(req.headers.sessionId);
+    if (!sessionInfo) {
+      return next(new ResponseError(401, UNAUTHORISED_ACCESS));
+    }
+    if (!sessionInfo.app.permission.lowLevelApi) {
+      return next(new ResponseError(403, API_ACCESS_NOT_GRANTED));
+    }
+    await appendableData.delete(sessionInfo.app, req.params.handleId);
+    responseHandler();
+  } catch (e) {
+    responseHandler(e);
+  }
+};
+
+export const restore = async (req, res) => {
+  const responseHandler = new ResponseHandler(req, res);
+  try {
+    const sessionInfo = sessionManager.get(req.headers.sessionId);
+    if (!sessionInfo) {
+      return next(new ResponseError(401, UNAUTHORISED_ACCESS));
+    }
+    if (!sessionInfo.app.permission.lowLevelApi) {
+      return next(new ResponseError(403, API_ACCESS_NOT_GRANTED));
+    }
+    if (isNaN(req.params.index)) {
+      return next(new ResponseError(400, 'index must be a valid number'));
+    }
+    await appendableData.restore(req.params.handleId, parseInt(req.params.index));
+    responseHandler();
+  } catch (e) {
     responseHandler(e);
   }
 };
@@ -384,11 +468,10 @@ export const deserialise = async (req, res) => {
     const handleId = await appendableData.deserialise(req.rawBody);
     const isOwner = await appendableData.isOwner(app, handleId);
     const version = await appendableData.getVersion(handleId);
-    // TODO const isPrivate = await appendableData.
     const filterType = await appendableData.getFilterType(handleId);
     const dataLength = await appendableData.getLength(handleId, false);
     const deletedDataLength = await appendableData.getLength(handleId, true);
-    responseHandler({
+    responseHandler(null, {
       handleId: handleId,
       isOwner: isOwner,
       version: version,
