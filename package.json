@@ -7,7 +7,7 @@
   "main": "dist/main.js",
   "identifier": "net.maidsafe.safelauncher",
   "scripts": {
-    "test": "cross-env NODE_ENV=test BABEL_DISABLE_CACHE=1 mocha --compilers js:babel-register --recursive --require ./test/setup.js test/**/*.spec.js",
+    "test": "cross-env NODE_ENV=test BABEL_DISABLE_CACHE=1 electron-mocha --compilers js:babel-register --recursive --require ./test/setup.js test/**/*.spec.js",
     "test-watch": "npm test -- --watch",
     "test-e2e": "cross-env NODE_ENV=test BABEL_DISABLE_CACHE=1 mocha --compilers js:babel-register --require ./test/setup.js ./test/e2e.js",
     "lint": "eslint app test *.js",
@@ -46,6 +46,7 @@
   "homepage": "https://github.com/maidsafe/safe_launcher#safe_launcher",
   "devDependencies": {
     "asar": "^0.12.1",
+    "axios": "^0.13.1",
     "babel-cli": "^6.11.4",
     "babel-core": "^6.13.1",
     "babel-eslint": "^6.1.2",
@@ -71,6 +72,7 @@
     "devtron": "^1.2.1",
     "electron": "1.4.0",
     "electron-devtools-installer": "^2.0.1",
+    "electron-mocha": "^3.1.1",
     "electron-packager": "^7.3.0",
     "electron-prebuilt": "1.4.0",
     "electron-rebuild": "^1.1.5",
@@ -107,7 +109,6 @@
     "webpack-target-electron-renderer": "^0.4.0"
   },
   "dependencies": {
-    "axios": "^0.13.1",
     "body-parser": "^1.15.2",
     "classnames": "^2.2.5",
     "css-modules-require-hook": "^4.0.1",
