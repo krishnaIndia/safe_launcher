@@ -4,7 +4,7 @@ import sessionManager from '../session_manager';
 import {ResponseError, ResponseHandler, updateAppActivity} from '../utils';
 import immutableData from '../../ffi/api/immutable_data';
 import cipherOpts from '../../ffi/api/cipher_opts';
-import {ImmutableDataWriter} from '../stream/immutable_data_writer';
+import ImmutableDataWriter from '../stream/immutable_data_writer';
 import {ImmutableDataReader} from '../stream/immutable_data_reader';
 const API_ACCESS_NOT_GRANTED = 'Low level api access is not granted';
 const UNAUTHORISED_ACCESS = 'Unauthorised access';
@@ -73,14 +73,7 @@ export const write = async (req, res, next) => {
     if (!req.headers['content-length'] || isNaN(req.headers['content-length'])) {
       return next(new ResponseError(400, 'Content-Length header is not present'));
     }
-    const length = parseInt(req.headers['content-length']);
-    if (length === 0) {
-      return responseHandler();
-    }
-    const writer = new ImmutableDataWriter(req, req.params.handleId, responseHandler, length);
-    req.on('aborted', () => {
-      next(new ResponseError(400, 'Request aborted by client'));
-    });
+    const writer = new ImmutableDataWriter(req, req.params.handleId, responseHandler);
     req.pipe(writer);
   } catch(e) {
     responseHandler(e);

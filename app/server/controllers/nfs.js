@@ -3,7 +3,7 @@ import sessionManager from '../session_manager';
 import { ResponseError, ResponseHandler } from '../utils';
 import { log } from './../../logger/log';
 import nfs from '../../ffi/api/nfs';
-import { NfsWriter } from '../stream/nfs_writer';
+import NfsWriter from '../stream/nfs_writer';
 import NfsReader from '../stream/nfs_reader';
 import { errorCodeLookup } from './../error_code_lookup';
 import util from 'util';
@@ -186,10 +186,6 @@ export var createFile = function(req, res, next) {
   if (typeof rootPath === 'undefined') {
     return next(new ResponseError(400, util.format(MSG_CONSTANTS.FAILURE.FIELD_NOT_VALID, 'rootPath')));
   }
-  if (!req.headers['content-length'] || isNaN(req.headers['content-length'])) {
-    return next(new ResponseError(400, 'Content-Length header is not present'));
-  }
-  let length = parseInt(req.headers['content-length']);
   let metadata = req.headers.metadata || '';
   if (typeof metadata !== 'string') {
     return next(new ResponseError(400, MSG_CONSTANTS.FAILURE.REQUIRED_PARAMS_MISSING));
@@ -197,7 +193,8 @@ export var createFile = function(req, res, next) {
   log.debug('NFS - Invoking create file request');
   const responseHandler = new ResponseHandler(req, res);
   const onWriterObtained = (writerId) => {
-    var writer = new NfsWriter(req, writerId, responseHandler, length);
+    // TODO handle empty file
+    var writer = new NfsWriter(req, writerId, responseHandler);
     req.on('aborted', function() {
       next(new ResponseError(400, 'Request aborted by client'));
     });

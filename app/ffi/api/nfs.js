@@ -322,18 +322,16 @@ class NFS extends FfiApi {
     if (!this.writerHolder.has(writerKey)) {
       return error('Writer not available');
     }
-    const self = this;
-    const executor = (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const onResult = (err, res) => {
         if (err || res !== 0) {
           return reject(err || res);
         }
-        self.writerHolder.delete(writerKey);
+        this.writerHolder.delete(writerKey);
         resolve();
       };
-      self.safeCore.nfs_writer_close.async(self.writerHolder.get(writerKey), onResult);
-    };
-    return new Promise(executor);
+      this.safeCore.nfs_writer_close.async(this.writerHolder.get(writerKey), onResult);
+    });
   }
 
   deleteFile(app, filePath, isShared = false) {
