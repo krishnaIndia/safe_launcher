@@ -11,10 +11,10 @@ node_js:
 python:
   - '2.7'
 
+sudo: true
+
 matrix:
   include:
-    - os: linux
-      sudo: true
     - os: osx
       osx_image: xcode7.3
 
